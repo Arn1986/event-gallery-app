@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import UploadWidget from '../../components/UploadWidget.jsx';
+
+export const prerender = true;
+
+const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+const uploadPreset = import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+---
+
+<BaseLayout
+  title="Admin Upload · Event Gallery"
+  description="Upload and tag event photos."
+  robots="noindex,nofollow"
+>
+  <main class="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <a
+      href="/"
+      class="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--text)]"
+    >
+      <span aria-hidden="true">←</span>
+      Public gallery
+    </a>
+
+    <header class="mb-8 mt-8 max-w-3xl md:mb-10">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Admin</p>
+      <h1 class="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Upload event photos</h1>
+      <p class="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">
+        Add event metadata once, then upload a batch directly to Cloudinary. Access to this route is intended to be enforced by Cloudflare Zero Trust at the edge.
+      </p>
+    </header>
+
+    <UploadWidget
+      client:load
+      cloudName={cloudName}
+      uploadPreset={uploadPreset}
+    />
+  </main>
+</BaseLayout>
