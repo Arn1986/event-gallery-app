@@ -27,6 +27,12 @@ function cloudinaryUrl(photo, width, extra = '') {
   return `https://res.cloudinary.com/${encodeURIComponent(CLOUD_NAME)}/image/upload/${transformations}/${version}${encodePublicId(photo.publicId)}${format}`;
 }
 
+// Helper function to force Cloudinary to trigger a file download
+function getDownloadUrl(secureUrl) {
+  if (!secureUrl) return '';
+  return secureUrl.replace('/upload/', '/upload/fl_attachment/');
+}
+
 function formatDate(value) {
   if (!value) return 'Date not set';
   const date = new Date(`${value}T00:00:00`);
@@ -44,13 +50,18 @@ function PhotoCard({ photo, onOpen }) {
     ? `${photo.eventName}${photo.eventType ? ` — ${photo.eventType}` : ''}`
     : 'Event photo';
   const ratio = photo.width && photo.height ? `${photo.width} / ${photo.height}` : '4 / 3';
+  
+  // Format a clean filename for the download
+  const downloadName = photo.eventName
+    ? `${photo.eventName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-photo.jpg`
+    : 'event-photo.jpg';
 
   return (
-    <article className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] shadow-sm">
+    <article className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] shadow-sm">
       <button
         type="button"
         onClick={onOpen}
-        className="group block w-full text-left"
+        className="block w-full text-left"
         aria-label={`Open ${alt} in lightbox`}
       >
         <div
@@ -82,6 +93,21 @@ function PhotoCard({ photo, onOpen }) {
           </div>
         </div>
       </button>
+
+      {/* Download Button Overlay */}
+      
+      <a
+        href={getDownloadUrl(photo.secureUrl)}
+        download={downloadName}
+        className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-lg bg-black/60 text-white opacity-40 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:opacity-100"
+        aria-label="Download high-resolution photo"
+        title="Download Photo"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden="true">
+          <path d="M19 15v4H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4h-2zm-6 2.414l5.707-5.707-1.414-1.414L13 14.586V2h-2v12.586l-4.293-4.293-1.414 1.414L13 17.414z"/>
+        </svg>
+      </a>
     </article>
   );
 }
