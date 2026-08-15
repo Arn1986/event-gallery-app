@@ -27,7 +27,6 @@ function cloudinaryUrl(photo, width, extra = '') {
   return `https://res.cloudinary.com/${encodeURIComponent(CLOUD_NAME)}/image/upload/${transformations}/${version}${encodePublicId(photo.publicId)}${format}`;
 }
 
-// Helper function to force Cloudinary to trigger a file download
 function getDownloadUrl(secureUrl) {
   if (!secureUrl) return '';
   return secureUrl.replace('/upload/', '/upload/fl_attachment/');
@@ -51,10 +50,49 @@ function PhotoCard({ photo, onOpen }) {
     : 'Event photo';
   const ratio = photo.width && photo.height ? `${photo.width} / ${photo.height}` : '4 / 3';
   
-  // Format a clean filename for the download
   const downloadName = photo.eventName
     ? `${photo.eventName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-photo.jpg`
     : 'event-photo.jpg';
+
+  // Smart download/share handler for mobile and desktop
+  const handleDownloadOrShare = async (e) => {
+    e.stopPropagation(); // Prevents lightbox from opening
+
+    const imageUrl = getDownloadUrl(photo.secureUrl);
+
+    // Check if the browser supports mobile Web Share API with files
+    if (navigator.share && navigator.canShare) {
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], downloadName, { type: blob.type });
+
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: photo.eventName || 'Event Photo',
+            text: `Photo from ${photo.eventName || 'Event'}`,
+          });
+          return;
+        }
+      } catch (err) {
+        // Ignore if user cancels the share drawer
+        if (err.name !== 'AbortError') {
+          console.error('Mobile share failed, falling back to download link', err);
+        } else {
+          return;
+        }
+      }
+    }
+
+    // Fallback for desktop or unsupported browsers
+    const a = document.createElement('a');
+    a.href = imageUrl;
+    a.download = downloadName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <article className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] shadow-sm">
@@ -94,20 +132,18 @@ function PhotoCard({ photo, onOpen }) {
         </div>
       </button>
 
-      {/* Download Button Overlay */}
-      
-      <a
-        href={getDownloadUrl(photo.secureUrl)}
-        download={downloadName}
+      {/* Download / Share Button Overlay */}
+      <button
+        type="button"
+        onClick={handleDownloadOrShare}
         className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-lg bg-black/60 text-white opacity-40 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/90 hover:opacity-100"
-        aria-label="Download high-resolution photo"
+        aria-label="Download or share high-resolution photo"
         title="Download Photo"
-        onClick={(e) => e.stopPropagation()}
       >
         <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden="true">
           <path d="M19 15v4H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4h-2zm-6 2.414l5.707-5.707-1.414-1.414L13 14.586V2h-2v12.586l-4.293-4.293-1.414 1.414L13 17.414z"/>
         </svg>
-      </a>
+      </button>
     </article>
   );
 }
