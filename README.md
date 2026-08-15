@@ -78,7 +78,7 @@ context: {
   event_date: eventDate,
 }
 ```
-
+all must be present
 The preset name is public by design for unsigned uploads. Cloudinary notes that unsigned presets embedded in client-side applications can be inspected. Cloudflare Access protects the admin route, but if you need stronger upload authorization later, switch the widget to a signed-upload flow.
 
 ## 4. Local development
