@@ -93,11 +93,8 @@ export default function UploadWidget({ cloudName, uploadPreset }) {
 
               cb({
                 uploadPreset,
-                context: {
-                  event_name: eventName,
-                  event_type: current.eventType,
-                  event_date: current.eventDate,
-                },
+                // CORRECT: Formatted as a pipe-separated string
+                context: `event_name=${encodeURIComponent(eventName)}|event_type=${encodeURIComponent(current.eventType)}|event_date=${encodeURIComponent(current.eventDate)}`,
                 tags: [
                   'event-gallery',
                   `event-type-${slugify(current.eventType)}`,
