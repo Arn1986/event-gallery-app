@@ -55,13 +55,17 @@ function PhotoCard({ photo, onOpen }) {
     : 'event-photo.jpg';
 
   // Smart download/share handler for mobile and desktop
+  // Smart download/share handler for mobile and desktop
   const handleDownloadOrShare = async (e) => {
     e.stopPropagation(); // Prevents lightbox from opening
 
     const imageUrl = getDownloadUrl(photo.secureUrl);
 
-    // Check if the browser supports mobile Web Share API with files
-    if (navigator.share && navigator.canShare) {
+    // Detect if the user is on a mobile device or tablet
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Only trigger the Share Sheet if on mobile AND the browser supports it
+    if (isMobile && navigator.share && navigator.canShare) {
       try {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
@@ -85,7 +89,7 @@ function PhotoCard({ photo, onOpen }) {
       }
     }
 
-    // Fallback for desktop or unsupported browsers
+    // Fallback for desktop (or if mobile share fails): direct file download
     const a = document.createElement('a');
     a.href = imageUrl;
     a.download = downloadName;
