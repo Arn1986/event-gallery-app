@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const EVENT_TYPES = ['Wedding', 'Concert', 'Corporate', 'Party', 'Sports'];
+const EVENT_TYPES = ['Races', 'Training', 'Party', 'Sports', 'Community'];
 
 function slugify(value) {
   return value
