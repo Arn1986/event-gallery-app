@@ -8,7 +8,7 @@ const DEFAULT_FILTERS = {
   eventDate: '',
 };
 
-const DEFAULT_EVENT_TYPES = ['Wedding', 'Concert', 'Corporate', 'Party', 'Sports'];
+const DEFAULT_EVENT_TYPES = ['Events', 'Races', 'Training', 'Party', 'Sports'];
 
 export default function GalleryExplorer() {
   const [photos, setPhotos] = useState([]);
