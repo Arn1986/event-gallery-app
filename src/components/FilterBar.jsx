@@ -1,4 +1,4 @@
-const DEFAULT_EVENT_TYPES = ['Wedding', 'Concert', 'Corporate', 'Party', 'Sports'];
+const DEFAULT_EVENT_TYPES = ['Events', 'Races', 'Training', 'Party', 'Sports'];
 
 export default function FilterBar({
   filters,
