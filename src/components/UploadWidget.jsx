@@ -180,7 +180,7 @@ export default function UploadWidget({ cloudName, uploadPreset }) {
               type="text"
               value={metadata.eventName}
               onChange={(event) => updateMetadata('eventName', event.target.value)}
-              placeholder="Annual Tech Summit 2026"
+              placeholder="Enter the name of the event"
               maxLength={120}
               className="h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-[var(--text)] placeholder:text-[var(--muted)]"
             />
