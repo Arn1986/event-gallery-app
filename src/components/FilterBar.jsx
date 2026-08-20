@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const DEFAULT_EVENT_TYPES = ['Races', 'Training', 'Party', 'Sports', 'Community'];
 
@@ -13,7 +13,9 @@ export default function FilterBar({
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  
+  // Use a ref instead of state to track scroll to prevent desktop lag
+  const lastScrollY = useRef(typeof window !== 'undefined' ? window.scrollY : 0);
 
   const setFilter = (key, value) => onChange({ ...filters, [key]: value });
   const hasFilters = Boolean(filters.eventName || filters.eventType || filters.eventDate);
@@ -21,22 +23,29 @@ export default function FilterBar({
   // Smart Sticky Scroll Logic
   useEffect(() => {
     const handleScroll = () => {
+      // 1. If the mobile accordion is open, do not hide the bar.
+      if (isExpanded) return;
+
+      // 2. If the user is actively typing or selecting an option, do not hide the bar.
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'select') return;
+
       const currentScrollY = window.scrollY;
       
       // Hide filter bar if scrolling down and passed 100px. Show if scrolling up.
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         setIsVisible(false);
-        // Optional: Automatically close the mobile menu when scrolling down
-        setIsExpanded(false);
-      } else {
+      } else if (currentScrollY < lastScrollY.current) {
         setIsVisible(true);
       }
-      setLastScrollY(currentScrollY);
+      
+      // Instantly update the ref without causing a React re-render
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [isExpanded]);
 
   return (
     <section
@@ -124,7 +133,7 @@ export default function FilterBar({
         </button>
       </div>
 
-      {/* Desktop counter (Hidden on mobile since it lives in the toggle bar) */}
+      {/* Desktop counter */}
       <p className="mt-3 hidden text-xs text-[var(--muted)] md:block" aria-live="polite">
         Showing {visibleCount} of {totalCount} photos
       </p>
